@@ -7,7 +7,7 @@ const app = createApp({
         const busqueda = ref('');
         const accion = ref('nuevo');
         
-        // Objeto inicial para el formulario
+        // Objeto inicial para el formulario...
         const alumnoInicial = {
             id: null,
             codigo: '',
@@ -32,7 +32,7 @@ const app = createApp({
             const n = localStorage.length;
             for (let i = 0; i < n; i++) {
                 const key = localStorage.key(i);
-                if (!isNaN(key)) { // Filtrar solo claves numéricas (IDs)
+                if (!isNaN(key)) { // Filtrar solo claves ID
                     try {
                         const data = JSON.parse(localStorage.getItem(key));
                         alumnos.value.push(data);
@@ -44,7 +44,7 @@ const app = createApp({
         };
 
         const guardarAlumno = () => {
-            // Validación básica de código duplicado
+            // Validación básica de código duplicado........
             const existeCodigo = alumnos.value.find(a => a.codigo === alumno.value.codigo && a.id !== alumno.value.id);
             if (existeCodigo) {
                 alert(`El código ${alumno.value.codigo} ya está registrado a nombre de ${existeCodigo.nombre}.`);
@@ -55,10 +55,10 @@ const app = createApp({
                 alumno.value.id = new Date().getTime();
             }
 
-            // Guardar en localStorage
+            // Guarda en el localStorage
             localStorage.setItem(alumno.value.id, JSON.stringify(alumno.value));
             
-            // Actualizar lista y limpiar
+            // Actualizar la lista y limpiar el formulario......
             obtenerAlumnos();
             resetForm();
         };
@@ -83,7 +83,7 @@ const app = createApp({
             accion.value = 'nuevo';
         };
 
-        // Propiedad computada para búsqueda
+        // para búsqueda
         const alumnosFiltrados = computed(() => {
             if (!busqueda.value) return alumnos.value;
             const term = busqueda.value.toLowerCase();
