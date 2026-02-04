@@ -22,7 +22,7 @@ const app = createApp({
         
         const alumno = ref({ ...alumnoInicial });
 
-        // Cargar datos al iniciar
+        // Cargar datos al iniciar ...
         onMounted(() => {
             obtenerAlumnos();
         });
