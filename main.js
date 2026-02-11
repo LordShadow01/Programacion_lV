@@ -1,110 +1,105 @@
-const { createApp, ref, computed, onMounted } = Vue;
+const { createApp } = Vue,
+    Dexie = window.Dexie,
+    db = new Dexie("db_academica");
 
-const app = createApp({
-    setup() {
-        // Estado reactivo
-        const alumnos = ref([]);
-        const busqueda = ref('');
-        const accion = ref('nuevo');
-        
-        // Objeto inicial para el formulario...
-        const alumnoInicial = {
-            id: null,
-            codigo: '',
-            nombre: '',
-            direccion: '',
-            municipio: '',
-            departamento: '',
-            telefono: '',
-            fechaNacimiento: '',
-            sexo: ''
-        };
-        
-        const alumno = ref({ ...alumnoInicial });
 
-        // Cargar datos al iniciar ...
-        onMounted(() => {
-            obtenerAlumnos();
-        });
-
-        const obtenerAlumnos = () => {
-            alumnos.value = [];
-            const n = localStorage.length;
-            for (let i = 0; i < n; i++) {
-                const key = localStorage.key(i);
-                if (!isNaN(key)) { // Filtrar solo claves ID
-                    try {
-                        const data = JSON.parse(localStorage.getItem(key));
-                        alumnos.value.push(data);
-                    } catch (e) {
-                        console.error('Error parsing student data', e);
-                    }
-                }
-            }
-        };
-
-        const guardarAlumno = () => {
-            // Validación básica de código duplicado........
-            const existeCodigo = alumnos.value.find(a => a.codigo === alumno.value.codigo && a.id !== alumno.value.id);
-            if (existeCodigo) {
-                alert(`El código ${alumno.value.codigo} ya está registrado a nombre de ${existeCodigo.nombre}.`);
-                return;
-            }
-
-            if (accion.value === 'nuevo') {
-                alumno.value.id = new Date().getTime();
-            }
-
-            // Guarda en el localStorage
-            localStorage.setItem(alumno.value.id, JSON.stringify(alumno.value));
-            
-            // Actualizar la lista y limpiar el formulario......
-            obtenerAlumnos();
-            resetForm();
-        };
-
-        const eliminarAlumno = (id) => {
-            if (confirm('¿Está seguro de eliminar este alumno?')) {
+createApp({
+    data(){
+        return{
+            alumno:{
+                idAlumno:0,
+                codigo:"",
+                nombre:"",
+                direccion:"",
+                email:"",
+                telefono:""
+            },
+            accion:'nuevo',
+            id:0,
+            idAlumno:0,
+            buscar:'',
+            alumnos:[]
+        }
+    },
+    methods:{
+        async obtenerAlumnos(){
+            this.alumnos = await db.alumnos.filter(
+                alumno => alumno.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
+                    || alumno.nombre.toLowerCase().includes(this.buscar.toLowerCase())
+            ).toArray();
+        },
+        async eliminarAlumno(idAlumno, e){
+            e.stopPropagation();
+            if(confirm("¿Está seguro de eliminar el alumno?")){
                 localStorage.removeItem(id);
-                obtenerAlumnos();
-                if (alumno.value.id === id) {
-                    resetForm();
+                await db.alumnos.delete(idAlumno);
+                this.obtenerAlumnos();
+            }
+        },
+        modificarAlumno(alumno){
+            this.accion = 'modificar';
+            this.id = alumno.id;
+            this.idAlumno = alumno.idAlumno;
+            this.alumno.codigo = alumno.codigo;
+            this.alumno.nombre = alumno.nombre;
+            this.alumno.direccion = alumno.direccion;
+            this.alumno.email = alumno.email;
+            this.alumno.telefono = alumno.telefono;
+        },
+        async guardarAlumno() {
+            let datos = {
+                id: this.accion=='modificar' ? this.id : this.getId(),
+                idAlumno: this.accion=='modificar' ? this.idAlumno : this.getId(),
+                codigo: this.alumno.codigo,
+                nombre: this.alumno.nombre,
+                direccion: this.alumno.direccion,
+                email: this.alumno.email,
+                telefono: this.alumno.telefono
+            }, codigoDuplicado = this.buscarAlumno(datos.codigo);
+            if(codigoDuplicado && this.accion=='nuevo'){
+                alert("El codigo del alumno ya existe, "+ codigoDuplicado.nombre);
+            };
+            this.buscar = datos.codigo;
+            await this.obtenerAlumnos();
+
+            if(this.alumnos.length > 0 && this.accion=='nuevo'){
+                alert("El codigo del alumno ya existe, "+ this.alumnos[0].nombre);
+                return; //Termina la ejecucion de la funcion
+            }
+            localStorage.setItem( datos.id, JSON.stringify(datos));
+            db.alumnos.put(datos);
+            this.limpiarFormulario();
+            this.obtenerAlumnos();
+        },
+        getId(){
+            return new Date().getTime();
+        },
+        limpiarFormulario(){
+            this.accion = 'nuevo';
+            this.id = 0;
+            this.idAlumno = 0;
+            this.alumno.codigo = '';
+            this.alumno.nombre = '';
+            this.alumno.direccion = '';
+            this.alumno.email = '';
+            this.alumno.telefono = '';
+        },
+        buscarAlumno(codigo=''){
+            let n = localStorage.length;
+            for(let i = 0; i < n; i++){
+                let key = localStorage.key(i);
+                let datos = JSON.parse(localStorage.getItem(key));
+                if(datos?.codigo && datos.codigo.trim().toUpperCase() == codigo.trim().toUpperCase()){
+                    return datos;
                 }
             }
-        };
-
-        const seleccionarAlumno = (item) => {
-            alumno.value = { ...item };
-            accion.value = 'modificar';
-        };
-
-        const resetForm = () => {
-            alumno.value = { ...alumnoInicial };
-            accion.value = 'nuevo';
-        };
-
-        // para búsqueda
-        const alumnosFiltrados = computed(() => {
-            if (!busqueda.value) return alumnos.value;
-            const term = busqueda.value.toLowerCase();
-            return alumnos.value.filter(a => 
-                a.codigo.toLowerCase().includes(term) || 
-                a.nombre.toLowerCase().includes(term)
-            );
+            return null;
+        }
+    },
+    mounted(){
+        db.version(1).stores({
+            "alumnos": "idAlumno, codigo, nombre, direccion, email, telefono"
         });
-
-        return {
-            alumno,
-            alumnos,
-            accion,
-            busqueda,
-            guardarAlumno,
-            eliminarAlumno,
-            seleccionarAlumno,
-            resetForm,
-            alumnosFiltrados
-        };
+        this.obtenerAlumnos();
     }
-});
-
-app.mount('#app');
+}).mount("#app");
