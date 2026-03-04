@@ -1,55 +1,368 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
-    <!-- Default theme -->
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
-    <!-- Semantic UI theme -->
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/semantic.min.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcial I - Programación IV</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Dexie -->
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .card {
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .btn-sm {
+            margin: 2px;
+        }
+        .search-box {
+            max-width: 300px;
+            margin-bottom: 15px;
+        }
+        .form-control:focus, .btn:focus {
+            box-shadow: none;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <nav class="navbar navbar-expand-lg bg-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">::.. SISTEMA ACADEMICO ..::</a>
-                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                    <div class="navbar-nav">
-                        <a class="nav-link" href="#" @click="abrirVentana('alumnos')">Alumnos</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('materias')">Materias</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('docentes')">Docentes</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('matriculas')">Matriculas</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('inscripciones')">Inscripciones</a>
+    <div id="app" class="container">
+        <h1 class="text-center mb-4">📚 Gestión de Biblioteca</h1>
+        <p class="text-center text-muted">No puedo vivir sin mi vida. No puedo vivir sin mi alma...Emely Bronte</p>
+
+        <!-- SECCIÓN AUTORES -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>Autores</h3>
+            </div>
+            <div class="card-body">
+                <!-- Formulario de autor -->
+                <form @submit.prevent="guardarAutor" class="row g-3 mb-4">
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" v-model="autorForm.codigo" placeholder="Código" required>
                     </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" v-model="autorForm.nombre" placeholder="Nombre completo" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" v-model="autorForm.pais" placeholder="País">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" v-model="autorForm.telefono" placeholder="Teléfono">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success w-100">{{ autorEditando ? 'Actualizar' : 'Guardar' }}</button>
+                        <button type="button" class="btn btn-secondary w-100 mt-1" @click="cancelarEdicionAutor" v-if="autorEditando">Cancelar</button>
+                    </div>
+                </form>
+
+                <!-- Búsqueda de autores -->
+                <div class="search-box">
+                    <input type="text" class="form-control" v-model="busquedaAutor" placeholder="Buscar por código, nombre, país o teléfono">
+                </div>
+
+                <!-- Tabla de autores -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>País</th>
+                                <th>Teléfono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="autor in autoresFiltrados" :key="autor.idAutor">
+                                <td>{{ autor.codigo }}</td>
+                                <td>{{ autor.nombre }}</td>
+                                <td>{{ autor.pais }}</td>
+                                <td>{{ autor.telefono }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" @click="editarAutor(autor)">Editar</button>
+                                    <button class="btn btn-danger btn-sm" @click="eliminarAutor(autor.idAutor)">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </nav>
-        <div id="appSistema" class="container-fluid">
-            <alumnos @buscar='buscar("busqueda_alumnos","obtenerAlumnos")' :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
-            <busqueda_alumnos @modificar='modificar("alumnos","modificarAlumno", $event)' ref="busqueda_alumnos" v-show="forms.busqueda_alumnos.mostrar"></busqueda_alumnos>
+        </div>
 
-            <materias @buscar='buscar("busqueda_materias","obtenerMaterias")' :forms="forms" ref="materias" v-show="forms.materias.mostrar"></materias>
-            <busqueda_materias @modificar='modificar("materias","modificarMateria", $event)' ref="busqueda_materias" v-show="forms.busqueda_materias.mostrar"></busqueda_materias>
+        <!-- SECCIÓN LIBROS -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3>Libros</h3>
+            </div>
+            <div class="card-body">
+                <!-- Formulario de libro -->
+                <form @submit.prevent="guardarLibro" class="row g-3 mb-4">
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" v-model="libroForm.isbn" placeholder="ISBN" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" v-model="libroForm.titulo" placeholder="Título" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" v-model="libroForm.editorial" placeholder="Editorial">
+                    </div>
+                    <div class="col-md-1">
+                        <input type="text" class="form-control" v-model="libroForm.edicion" placeholder="Edición">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" v-model="libroForm.idAutor" required>
+                            <option value="" disabled>Seleccione autor</option>
+                            <option v-for="autor in autores" :key="autor.idAutor" :value="autor.idAutor">
+                                {{ autor.nombre }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success w-100">{{ libroEditando ? 'Actualizar' : 'Guardar' }}</button>
+                        <button type="button" class="btn btn-secondary w-100 mt-1" @click="cancelarEdicionLibro" v-if="libroEditando">Cancelar</button>
+                    </div>
+                </form>
 
-            <docentes @buscar='buscar("busqueda_docentes","obtenerDocentes")' :forms="forms" ref="docentes" v-show="forms.docentes.mostrar"></docentes>
-            <busqueda_docentes @modificar='modificar("docentes","modificarDocente", $event)' ref="busqueda_docentes" v-show="forms.busqueda_docentes.mostrar"></busqueda_docentes>
+                <!-- Búsqueda de libros -->
+                <div class="search-box">
+                    <input type="text" class="form-control" v-model="busquedaLibro" placeholder="Buscar por ISBN, título, editorial o edición">
+                </div>
+
+                <!-- Tabla de libros -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ISBN</th>
+                                <th>Título</th>
+                                <th>Editorial</th>
+                                <th>Edición</th>
+                                <th>Autor</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="libro in librosFiltrados" :key="libro.idLibro">
+                                <td>{{ libro.isbn }}</td>
+                                <td>{{ libro.titulo }}</td>
+                                <td>{{ libro.editorial }}</td>
+                                <td>{{ libro.edicion }}</td>
+                                <td>{{ nombreAutor(libro.idAutor) }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" @click="editarLibro(libro)">Editar</button>
+                                    <button class="btn btn-danger btn-sm" @click="eliminarLibro(libro.idLibro)">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.2.0/dexie.min.js"
-        integrity="sha512-LuXLH9xON6/aAGYxi4Z1Dx8588Z80gY3iMmGtUlYmblUc1ulC/cGHuANXIvm8fnIWp5ShUk2MRBIWylGguXF9g=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="componentes/alumnos.js"></script>
-    <script src="componentes/busqueda_alumnos.js"></script>
-    <script src="componentes/materias.js"></script>
-    <script src="componentes/busqueda_materias.js"></script>
-    <script src="componentes/docentes.js"></script>
-    <script src="componentes/busqueda_docentes.js"></script>
-    <script src="main.js"></script>
+
+    <script>
+        const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+        // Configuración de Dexie con mi codigo pues : db_USSS021624
+        const db = new Dexie('db_USSS021624');
+        db.version(1).stores({
+            autor: '++idAutor, codigo, nombre, pais, telefono',
+            libros: '++idLibro, idAutor, isbn, titulo, editorial, edicion'
+        });
+
+        const app = createApp({
+            setup() {
+                // Datos reactivos para autores de todos okay
+                const autores = ref([]);
+                const autorForm = reactive({
+                    idAutor: null,
+                    codigo: '',
+                    nombre: '',
+                    pais: '',
+                    telefono: ''
+                });
+                const autorEditando = ref(false);
+                const busquedaAutor = ref('');
+
+                // Datos reactivos para libros del cual se ingresa
+                const libros = ref([]);
+                const libroForm = reactive({
+                    idLibro: null,
+                    idAutor: '',
+                    isbn: '',
+                    titulo: '',
+                    editorial: '',
+                    edicion: ''
+                });
+                const libroEditando = ref(false);
+                const busquedaLibro = ref('');
+
+                // Cargar datos desde IndexedDB
+                const cargarAutores = async () => {
+                    autores.value = await db.autor.toArray();
+                };
+                const cargarLibros = async () => {
+                    libros.value = await db.libros.toArray();
+                };
+
+                onMounted(() => {
+                    cargarAutores();
+                    cargarLibros();
+                });
+
+                // --- OPERACIONES CRUD PARA AUTORES ---
+                const guardarAutor = async () => {
+                    if (autorEditando.value) {
+                        // Actualizar
+                        await db.autor.update(autorForm.idAutor, {
+                            codigo: autorForm.codigo,
+                            nombre: autorForm.nombre,
+                            pais: autorForm.pais,
+                            telefono: autorForm.telefono
+                        });
+                        cancelarEdicionAutor();
+                    } else {
+                        // Agregar nuevo
+                        await db.autor.add({
+                            codigo: autorForm.codigo,
+                            nombre: autorForm.nombre,
+                            pais: autorForm.pais,
+                            telefono: autorForm.telefono
+                        });
+                        // Limpiar formulario
+                        Object.assign(autorForm, { codigo: '', nombre: '', pais: '', telefono: '' });
+                    }
+                    cargarAutores();
+                };
+
+                const editarAutor = (autor) => {
+                    Object.assign(autorForm, autor);
+                    autorEditando.value = true;
+                };
+
+                const cancelarEdicionAutor = () => {
+                    Object.assign(autorForm, { idAutor: null, codigo: '', nombre: '', pais: '', telefono: '' });
+                    autorEditando.value = false;
+                };
+
+                const eliminarAutor = async (id) => {
+                    if (confirm('¿Eliminar este autor? Se eliminarán también sus libros (por integridad referencial).')) {
+                        // Primero eliminar libros relacionados
+                        await db.libros.where('idAutor').equals(id).delete();
+                        await db.autor.delete(id);
+                        cargarAutores();
+                        cargarLibros();
+                    }
+                };
+
+                // --- OPERACIONES CRUD PARA LIBROS ---
+                const guardarLibro = async () => {
+                    if (libroEditando.value) {
+                        // Actualizar
+                        await db.libros.update(libroForm.idLibro, {
+                            idAutor: libroForm.idAutor,
+                            isbn: libroForm.isbn,
+                            titulo: libroForm.titulo,
+                            editorial: libroForm.editorial,
+                            edicion: libroForm.edicion
+                        });
+                        cancelarEdicionLibro();
+                    } else {
+                        // Agregar nuevo
+                        await db.libros.add({
+                            idAutor: libroForm.idAutor,
+                            isbn: libroForm.isbn,
+                            titulo: libroForm.titulo,
+                            editorial: libroForm.editorial,
+                            edicion: libroForm.edicion
+                        });
+                        // Limpiar formulario
+                        Object.assign(libroForm, { idAutor: '', isbn: '', titulo: '', editorial: '', edicion: '' });
+                    }
+                    cargarLibros();
+                };
+
+                const editarLibro = (libro) => {
+                    Object.assign(libroForm, libro);
+                    libroEditando.value = true;
+                };
+
+                const cancelarEdicionLibro = () => {
+                    Object.assign(libroForm, { idLibro: null, idAutor: '', isbn: '', titulo: '', editorial: '', edicion: '' });
+                    libroEditando.value = false;
+                };
+
+                const eliminarLibro = async (id) => {
+                    if (confirm('¿Eliminar este libro?')) {
+                        await db.libros.delete(id);
+                        cargarLibros();
+                    }
+                };
+
+                // --- FILTROS DE BÚSQUEDA ---
+                const autoresFiltrados = computed(() => {
+                    const texto = busquedaAutor.value.toLowerCase();
+                    if (!texto) return autores.value;
+                    return autores.value.filter(autor => 
+                        (autor.codigo && autor.codigo.toLowerCase().includes(texto)) ||
+                        (autor.nombre && autor.nombre.toLowerCase().includes(texto)) ||
+                        (autor.pais && autor.pais.toLowerCase().includes(texto)) ||
+                        (autor.telefono && autor.telefono.toLowerCase().includes(texto))
+                    );
+                });
+
+                const librosFiltrados = computed(() => {
+                    const texto = busquedaLibro.value.toLowerCase();
+                    if (!texto) return libros.value;
+                    return libros.value.filter(libro => 
+                        (libro.isbn && libro.isbn.toLowerCase().includes(texto)) ||
+                        (libro.titulo && libro.titulo.toLowerCase().includes(texto)) ||
+                        (libro.editorial && libro.editorial.toLowerCase().includes(texto)) ||
+                        (libro.edicion && libro.edicion.toLowerCase().includes(texto))
+                    );
+                });
+
+                // Obtener nombre del autor por ID (para mostrar en tabla de libros)
+                const nombreAutor = (idAutor) => {
+                    const autor = autores.value.find(a => a.idAutor === idAutor);
+                    return autor ? autor.nombre : 'Desconocido';
+                };
+
+                return {
+                    autores,
+                    autorForm,
+                    autorEditando,
+                    busquedaAutor,
+                    guardarAutor,
+                    editarAutor,
+                    cancelarEdicionAutor,
+                    eliminarAutor,
+                    autoresFiltrados,
+                    libros,
+                    libroForm,
+                    libroEditando,
+                    busquedaLibro,
+                    guardarLibro,
+                    editarLibro,
+                    cancelarEdicionLibro,
+                    eliminarLibro,
+                    librosFiltrados,
+                    nombreAutor
+                };
+            }
+        });
+
+        app.mount('#app');
+    </script>
 </body>
 </html>
