@@ -3,15 +3,27 @@ const { createApp } = Vue,
     db = new Dexie("db_academica"),
     sha256 = CryptoJS.SHA256;
 
+// Configurar la base de datos Dexie inmediatamente
+db.version(3).stores({
+    "alumnos": "idAlumno, codigo, nombre, direccion, email, telefono",
+    "materias": "idMateria, codigo, nombre, uv",
+    "docentes": "idDocente, codigo, nombre, direccion, email, telefono, escalafon",
+    "inscripciones": "idInscripcion, codigo_alumno, materia, fecha_inscripcion, ciclo_periodo, observaciones",
+    "matriculas": "idMatricula, codigo_alumno, fecha_matricula, pago, ciclo, comprobante"
+});
 
-createApp({
+const app = createApp({
     components:{
         alumnos,
-        busqueda_alumnos,
+        buscar_alumnos: busqueda_alumnos,
         materias,
-        busqueda_materias,
+        buscar_materias: busqueda_materias,
         docentes,
-        busqueda_docentes
+        buscar_docentes: busqueda_docentes,
+        inscripciones,
+        buscar_inscripciones: busqueda_inscripciones,
+        matriculas,
+        buscar_matriculas: busqueda_matriculas
     },
     data(){
         return{
@@ -23,7 +35,9 @@ createApp({
                 docentes:{mostrar:false},
                 busqueda_docentes:{mostrar:false},
                 matriculas:{mostrar:false},
-                inscripciones:{mostrar:false}
+                busqueda_matriculas:{mostrar:false},
+                inscripciones:{mostrar:false},
+                busqueda_inscripciones:{mostrar:false}
             }
         }
     },
@@ -37,12 +51,10 @@ createApp({
         modificar(ventana, metodo, data){
             this.$refs[ventana][metodo](data);
         }
-    },
-    mounted(){
-        db.version(1).stores({
-            "alumnos": "idAlumno, codigo, nombre, direccion, email, telefono",
-            "materias": "idMateria, codigo, nombre, uv",
-            "docentes": "idDocente, codigo, nombre, direccion, email, telefono, escalafon"
-        });
     }
-}).mount("#app");
+});
+
+// Registrar directiva
+app.directive('draggable', vDraggable);
+
+app.mount("#app");
