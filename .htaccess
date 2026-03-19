@@ -1,0 +1,9 @@
+# Configuración para que Apache sirva correctamente los archivos de SQLite WASM
+AddType application/wasm .wasm
+AddType application/javascript .js
+
+# Cabeceras OBLIGATORIAS para habilitar SQLite + OPFS (Modo Shared)
+<IfModule mod_headers.c>
+    Header set Cross-Origin-Opener-Policy "same-origin"
+    Header set Cross-Origin-Embedder-Policy "require-corp"
+</IfModule>

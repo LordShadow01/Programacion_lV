@@ -1,15 +1,21 @@
+<?php
+// Cabeceras para habilitar el aislamiento de origen cruzado (necesario para SQLite OPFS)
+header("Cross-Origin-Opener-Policy: same-origin");
+header("Cross-Origin-Embedder-Policy: require-corp");
+header("Cross-Origin-Resource-Policy: same-origin");
+?>
 <!doctype html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
+    <link rel="stylesheet" href="lib/bootstrap.min.css" />
+    <link rel="stylesheet" href="lib/alertify.min.css"/>
     <!-- Default theme -->
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <link rel="stylesheet" href="lib/alertify_default.min.css"/>
     <!-- Semantic UI theme -->
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/semantic.min.css"/>
+    <link rel="stylesheet" href="lib/alertify_semantic.min.css"/>
 </head>
 <body>
     <div id="app">
@@ -44,14 +50,14 @@
             <buscar_matriculas @modificar='modificar("matriculas","modificarMatricula", $event)' :forms="forms" ref="busqueda_matriculas" v-show="forms.busqueda_matriculas.mostrar"></buscar_matriculas>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.2.0/dexie.min.js"
-        integrity="sha512-LuXLH9xON6/aAGYxi4Z1Dx8588Z80gY3iMmGtUlYmblUc1ulC/cGHuANXIvm8fnIWp5ShUk2MRBIWylGguXF9g=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="lib/uuid.min.js"></script>
+    <script src="lib/crypto-js.min.js"></script>
+    <script src="lib/alertify.min.js"></script>
+    <!-- CARGA DE SQLITE WASM CON OPFS -->
+    <script src="sqlite3.js"></script>
+    <script src="db.js"></script>
+    <script src="lib/bootstrap.bundle.min.js"></script>
+    <script src="lib/vue.global.js"></script>
     <script src="directivas/draggable.js"></script>
     <script src="componentes/alumnos.js"></script>
     <script src="componentes/busqueda_alumnos.js"></script>

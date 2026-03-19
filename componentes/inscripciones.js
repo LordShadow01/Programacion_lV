@@ -81,9 +81,12 @@ const inscripciones = {
                 return;
             }
 
+            // Buscamos el nombre del alumno para que el buscador lo tenga al instante
+            let alumno = this.alumnos.find(a => a.codigo === this.inscripcion.codigo_alumno);
             let datos = {
                 idInscripcion: this.accion === 'modificar' ? this.idInscripcion : this.getId(),
                 codigo_alumno: this.inscripcion.codigo_alumno,
+                nombre_alumno: alumno ? alumno.nombre : 'Alum. desconocido',
                 materia: this.inscripcion.materia,
                 fecha_inscripcion: this.inscripcion.fecha_inscripcion,
                 ciclo_periodo: this.inscripcion.ciclo_periodo,

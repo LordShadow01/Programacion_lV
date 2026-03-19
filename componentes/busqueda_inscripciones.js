@@ -14,8 +14,9 @@ const busqueda_inscripciones = {
             this.$emit('modificar', inscripcion);
         },
         async obtenerInscripciones() {
-            let totalLocal = await db.inscripciones.count();
-            if (totalLocal <= 0) {
+            // Revisamos cuántos hay para ver si necesitamos jalar a SQLite por primera vez
+            let count = await db.inscripciones.count();
+            if (count === 0) {
                 let formData = new FormData();
                 formData.append('accion', 'consultar');
                 try {
@@ -24,20 +25,20 @@ const busqueda_inscripciones = {
                         body: formData
                     });
                     let data = await respuesta.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        await db.inscripciones.clear(); // Limpiamos para asegurar que todos tengan el nombre
+                    if (Array.isArray(data)) {
                         await db.inscripciones.bulkPut(data);
                     }
                 } catch (error) { console.error(error); }
             }
 
-            this.inscripciones = await db.inscripciones.filter(
-                inscripcion => (
-                    inscripcion.codigo_alumno?.toLowerCase().includes(this.buscar.toLowerCase())
-                    || String(inscripcion.nombre_alumno)?.toLowerCase().includes(this.buscar.toLowerCase())
-                    || String(inscripcion.materia)?.toLowerCase().includes(this.buscar.toLowerCase())
-                )
-            ).toArray();
+            // Búsqueda instantánea desde SQLite
+            const all = await db.inscripciones.toArray();
+            this.inscripciones = all.filter(ins => {
+                const search = this.buscar.toLowerCase();
+                return (ins.codigo_alumno || '').toLowerCase().includes(search)
+                    || (ins.nombre_alumno || '').toLowerCase().includes(search)
+                    || (ins.materia || '').toLowerCase().includes(search);
+            });
         },
         async eliminarInscripcion(inscripcion, e) {
             e.stopPropagation();

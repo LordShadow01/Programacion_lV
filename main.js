@@ -1,16 +1,8 @@
 const { createApp } = Vue,
-    Dexie = window.Dexie,
-    db = new Dexie("db_academica"),
     sha256 = CryptoJS.SHA256;
 
-// Configurar la base de datos Dexie inmediatamente
-db.version(3).stores({
-    "alumnos": "idAlumno, codigo, nombre, direccion, email, telefono",
-    "materias": "idMateria, codigo, nombre, uv",
-    "docentes": "idDocente, codigo, nombre, direccion, email, telefono, escalafon",
-    "inscripciones": "idInscripcion, codigo_alumno, materia, fecha_inscripcion, ciclo_periodo, observaciones",
-    "matriculas": "idMatricula, codigo_alumno, fecha_matricula, pago, ciclo, comprobante"
-});
+// SQLite + OPFS se inicializa automáticamente en db.js
+// El esquema está gestionado en el worker.
 
 const app = createApp({
     components:{
