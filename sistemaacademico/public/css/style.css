@@ -1,0 +1,134 @@
+:root {
+  --primary-color: #00acc1; /* Dark aqua */
+  --primary-light: #33b5e5;
+  --bg-color: #0f172a; 
+  --card-bg: rgba(30, 41, 59, 0.7);
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-color) !important;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(192, 100%, 38%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(192, 100%, 38%, 0.1) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.bg-darker {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(12px);
+}
+
+.brand-text {
+  text-shadow: 0 0 20px rgba(0, 172, 193, 0.4);
+}
+
+/* Sidebar Custom Hover */
+.theme-nav-link {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.theme-nav-link:hover, .theme-nav-link.active {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+  transform: translateX(5px);
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: var(--card-bg) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Bootstrap Table Customization text-light */
+.table-dark-custom {
+  --bs-table-bg: transparent;
+  --bs-table-color: #cbd5e1;
+  --bs-table-border-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-dark-custom th {
+  background-color: rgba(0, 172, 193, 0.1) !important;
+  color: var(--primary-light) !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--primary-color) !important;
+}
+
+.table-dark-custom tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: white;
+}
+
+/* Forms */
+.form-control-dark {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+.form-control-dark:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 172, 193, 0.25) !important;
+}
+
+.form-control-dark::placeholder {
+  color: #64748b !important;
+}
+
+/* Modals */
+.modal-content.glass-modal {
+  background: var(--card-bg) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: white;
+}
+
+.modal-header, .modal-footer {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Buttons */
+.btn-info-custom {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(0, 172, 193, 0.3);
+}
+
+.btn-info-custom:hover {
+  background-color: var(--primary-light) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 172, 193, 0.4);
+}
+
+/* Stat Cards */
+.stat-border {
+  border-left: 4px solid var(--primary-color) !important;
+}
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: rgba(0, 172, 193, 0.15);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
