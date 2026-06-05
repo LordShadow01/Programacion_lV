@@ -1,0 +1,32 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-7T_arPNu.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/assets/auth-bg.jpg": {
+    "file": "assets/auth-bg-DZImC102.jpg",
+    "src": "resources/js/assets/auth-bg.jpg"
+  },
+  "resources/js/assets/logo.png": {
+    "file": "assets/logo-D7yBnT_V.png",
+    "src": "resources/js/assets/logo.png"
+  },
+  "resources/js/main.js": {
+    "file": "assets/main-BF_Yfgsv.js",
+    "name": "main",
+    "src": "resources/js/main.js",
+    "isEntry": true,
+    "css": [
+      "assets/main-BNCCdJso.css"
+    ],
+    "assets": [
+      "assets/logo-D7yBnT_V.png",
+      "assets/auth-bg-DZImC102.jpg"
+    ]
+  }
+}

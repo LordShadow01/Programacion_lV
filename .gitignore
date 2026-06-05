@@ -1,0 +1,11 @@
+/mango-music/node_modules/
+/mango-music/vendor/
+/mango-music/.env
+/mango-music/bootstrap/cache/
+/mango-music/storage/
+/mango-music/public/hot
+/mango-music/public/storage
+.phpunit.result.cache
+.env
+.env.backup
+.env.production
